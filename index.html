@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Compras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .btn {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #45a049;
+    }
+    .btn-encerrar {
+      background-color: #f44336;
+    }
+    .btn-encerrar:hover {
+      background-color: #e53935;
+    }
+    .hidden {
+      display: none;
+    }
+    .btn-deletar {
+      background-color: #f44336;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .btn-deletar:hover {
+      background-color: #e53935;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Lista de Compras</h1>
+    <div class="form-group">
+      <label for="item">Qual comida você deseja adicionar?</label>
+      <input type="text" id="item" placeholder="Digite o nome da comida" />
+    </div>
+    <div class="form-group">
+      <label for="categoria">Em qual categoria essa comida se encaixa?</label>
+      <select id="categoria">
+        <option value="frutas">Frutas</option>
+        <option value="laticinios">Laticínios</option>
+        <option value="congelados">Congelados</option>
+        <option value="doces">Doces</option>
+        <option value="outros">Outros</option>
+      </select>
+    </div>
+    <button class="btn" id="btnAdicionar" onclick="adicionarItem()">Adicionar à Lista</button>
+    
+    <div class="form-group">
+      <label for="novaCategoria">Adicionar nova categoria:</label>
+      <input type="text" id="novaCategoria" placeholder="Digite o nome da nova categoria" />
+      <button class="btn" id="btnAdicionarCategoria" onclick="adicionarNovaCategoria()">Adicionar Categoria</button>
+    </div>
+
+    <!-- Botão para encerrar a lista -->
+    <button class="btn btn-encerrar" id="btnEncerrar" onclick="encerrarLista()">Encerrar Lista</button>
+
+    <div id="resultado"></div>
+  </div>
+
+  <script>
+    let listaDeCompras = {
+      frutas: [],
+      laticinios: [],
+      congelados: [],
+      doces: [],
+      outros: []
+    };
+
+    let listaEncerrada = false; // Flag para verificar se a lista foi encerrada
+
+    function exibirListaDeCompras() {
+      let resultado = document.getElementById("resultado");
+      resultado.innerHTML = ""; // Limpa o resultado anterior
+
+      // Exibe apenas os itens das categorias
+      for (let categoria in listaDeCompras) {
+        if (listaDeCompras[categoria].length > 0) {
+          resultado.innerHTML += `<p><strong>${capitalize(categoria)}:</strong> ${listaDeCompras[categoria].map(item => `${item} <button class="btn-deletar" onclick="deletarItem('${categoria}', '${item}')">Deletar</button>`).join(', ')}</p>`;
+        }
+      }
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function adicionarItem() {
+      if (listaEncerrada) {
+        alert("A lista foi encerrada. Não é possível adicionar mais itens.");
+        return;
+      }
+
+      let item = document.getElementById("item").value;
+      let categoria = document.getElementById("categoria").value;
+
+      if (item.trim() === "") {
+        alert("Por favor, digite o nome de uma comida!");
+        return;
+      }
+
+      listaDeCompras[categoria].push(item);
+      document.getElementById("item").value = "";  // Limpa o campo de entrada
+
+      // Exibe a lista atualizada
+      exibirListaDeCompras();
+    }
+
+    function adicionarNovaCategoria() {
+      if (listaEncerrada) {
+        alert("A lista foi encerrada. Não é possível adicionar novas categorias.");
+        return;
+      }
+
+      let novaCategoria = document.getElementById("novaCategoria").value.trim().toLowerCase();
+
+      if (novaCategoria && !listaDeCompras[novaCategoria]) {
+        listaDeCompras[novaCategoria] = []; // Adiciona a nova categoria ao objeto
+        alert(`Categoria "${novaCategoria}" foi adicionada com sucesso!`);
+
+        // Atualiza as opções de categoria no select
+        let selectCategoria = document.getElementById("categoria");
+        let newOption = document.createElement("option");
+        newOption.value = novaCategoria;
+        newOption.text = capitalize(novaCategoria);
+        selectCategoria.appendChild(newOption);
+
+        document.getElementById("novaCategoria").value = ""; // Limpa o campo de nova categoria
+      } else if (listaDeCompras[novaCategoria]) {
+        alert("Essa categoria já existe!");
+      } else {
+        alert("Por favor, digite o nome de uma nova categoria.");
+      }
+    }
+
+    function deletarItem(categoria, item) {
+      if (listaEncerrada) {
+        alert("A lista foi encerrada. Não é possível remover itens.");
+        return;
+      }
+
+      // Remove o item da categoria
+      listaDeCompras[categoria] = listaDeCompras[categoria].filter(i => i !== item);
+
+      // Exibe a lista atualizada após a remoção
+      exibirListaDeCompras();
+    }
+
+    function encerrarLista() {
+      listaEncerrada = true; // Marca a lista como encerrada
+      alert("A lista foi encerrada. Não é possível adicionar ou remover mais itens.");
+      
+      // Ocultar os campos de adição de item e categoria
+      document.getElementById("item").classList.add("hidden");
+      document.getElementById("categoria").classList.add("hidden");
+      document.getElementById("btnAdicionar").classList.add("hidden");
+      document.getElementById("novaCategoria").classList.add("hidden");
+      document.getElementById("btnAdicionarCategoria").classList.add("hidden");
+
+      // Exibe apenas os itens das categorias
+      exibirListaDeCompras();
+    }
+  </script>
+
+</body>
+</html>
